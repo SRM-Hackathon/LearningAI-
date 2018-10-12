@@ -7,7 +7,7 @@ services:
       - '4000:5432'
   web:
     image: learning_platform
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python local.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:

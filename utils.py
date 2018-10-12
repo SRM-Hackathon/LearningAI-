@@ -5,8 +5,11 @@ import apiai
 from datetime import timedelta
 
 import requests
+from django.contrib.auth.models import User
 
 from learning_dot_ai.settings import CLIENT_ACCESS_TOKEN, DEVELOPER_ACCESS_TOKEN, ENTITY_ADDITION_URL, DEVELOPER_HEADERS
+from user.factory import UserFactory
+from user.models import Team, PlatformUser, TeamMembership
 
 
 def get_displaced_time_from_duration_entity(current_time, duration):
@@ -30,4 +33,13 @@ def add_entity_in_dialogflow(entity_type, entity_name, synonyms):
         data=serialized_dict,
         headers=DEVELOPER_HEADERS
     )
-    print(entity_request.status_code)
+
+
+def prepare_data_for_user(payload):
+    identity = payload["user"]
+    team = payload["team"]
+    channel = payload["channel"]
+    team, _ = Team.objects.get_or_create(identity=team)
+    user, _ = User.objects.get_or_create(username=identity)
+    pu, _ = PlatformUser.objects.get_or_create(identity=identity, user=user)
+    TeamMembership.objects.get_or_create(platform_user=pu, team=team)
