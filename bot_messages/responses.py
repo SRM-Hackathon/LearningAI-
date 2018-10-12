@@ -34,3 +34,24 @@ class SessionResponses:
     def end_session_msg(cls, task_name, duration_spent):
         days, hours, minutes = days_hours_minutes(duration_spent)
         return format_end_session_response(days, hours, minutes, task_name)
+
+    @classmethod
+    def create_msg(cls, task):
+        return {
+            "SUCCESS": "Cool.. Your session on {} starts now".format(task),
+            "FAILURE": "Couldn't start your session. Check if a task by the name {} exists".format(task.name)
+        }
+
+    @classmethod
+    def break_session_msg(cls, task):
+        return {
+            "SUCCESS": "Okay.. Your session on {} is paused. Continue after your break".format(task.name),
+            "FAILURE": "Couldn't pause your session. Check if a task by the name {} exists".format(task.name)
+        }
+
+    @classmethod
+    def resume_session_msg(cls, task):
+        return {
+            "SUCCESS": "Awesome.. Your are resuming your session on {}".format(task.name),
+            "FAILURE": "Couldn't find your session. Check if a task by the name {} exists".format(task.name)
+        }

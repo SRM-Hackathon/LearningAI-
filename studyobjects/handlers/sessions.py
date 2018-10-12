@@ -62,21 +62,26 @@ class SessionHandler(IntentHandler):
 
     def create(self, is_master=True):
         task = self.get_task()
+        response = SessionResponses.create_msg(task)
         if task:
             self.session = UserSession.objects.create(
                 user=self.user,
                 task=task,
                 is_master=is_master
             )
-            return True
+            return response.get("SUCCESS")
+        return response.get("FAILURE")
 
     def breaksession(self):
+        task = self.get_task()
         user_session = self.get_object()
+        response = SessionResponses.break_session_msg(task)
         if user_session:
             user_session.end_time = datetime.datetime.now()
             user_session.termination_type = UserSession.BREAK_TERMINATION
             user_session.save()
-            return True
+            return response.get("SUCCESS")
+        return response.get("FAILURE")
 
     def end(self):
         user_session = self.get_object()
@@ -121,10 +126,13 @@ class SessionHandler(IntentHandler):
         # if previous session is break create new session
         # if previous session is not break create a new master session
         user_session = self.get_object()
+        task = self.task()
         if user_session.termination_type is None or user_session.termination_type == UserSession.NORMAL_TERMINATION:
             self.create()
         elif self.session.termination_type == UserSession.BREAK_TERMINATION:
             self.create(is_master=False)
+        response = SessionResponses.resume_session_msg(task.name)
+        return response
 
     def time_stats(self):
         task_name = self.response["task"]
