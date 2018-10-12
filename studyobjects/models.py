@@ -107,3 +107,20 @@ class UserSession(TimeStampMixin):
 
     user = models.ForeignKey(TeamMembership, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
+
+
+class Doubts(TimeStampMixin):
+    description = models.TextField()
+    is_clarified = models.BooleanField(default=False)
+
+    user = models.ForeignKey(TeamMembership, on_delete=models.CASCADE)
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.PROTECT)
+
+
+class DoubtsClarified(TimeStampMixin):
+    clarified_response = models.TextField()
+    is_clarified = models.BigAutoField(default=False)
+
+    cleared_by = models.ForeignKey(TeamMembership, on_delete=models.PROTECT)
+    doubt = models.ForeignKey(Doubts, on_delete=models.CASCADE)
