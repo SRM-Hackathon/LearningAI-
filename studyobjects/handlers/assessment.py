@@ -1,22 +1,34 @@
-from constants import GROUP_COURSE_INSTRUCTORS
-from decorators import access_gateway
-from studyobjects.models import Assessment
+from studyobjects.base import IntentHandler
+from studyobjects.models import Assessment, Course, Tag
+from user.models import TeamMembership
 
 
-access_gateway([GROUP_COURSE_INSTRUCTORS, ])
-def create_assessment(parameter_dict, team_membership):
-    course = parameter_dict['course'].string_value
-    name = parameter_dict['name'].string_value
-    list_tags = parameter_dict['tags'].list_value.values
-    tags = []
-    for item in list_tags:
-        tags.append(item.string_value)
-    datetime = parameter_dict['datetime'].struct_value.fields['date_time'].string_value
-    Assessment.objects.create(
-        course=course,
-        name=name,
-        tags=tags,
-        scheduled_at=datetime,
-        created_by=team_membership
-    )
-    return True
+class AssessmentHandler(IntentHandler):
+
+    def create(self):
+        course_name = self.response.get("course")
+        list_tags = self.response.get("tags")
+        datetime = self.response.get("datetime")
+        course = Course.objects.get(team=self.user.team, instructor=self.user, name=course_name)
+        name = course_name + '_' + datetime
+        assessment = Assessment.objects.create(
+            course=course,
+            name=name,
+            scheduled_at=datetime,
+            created_by=self.user
+        )
+        for tag in list_tags:
+            tag = Tag.objects.get(name=tag, course=course)
+            assessment.tags.add(tag)
+        assessment.save()
+        return True
+
+    def list_assessments(self):
+        course = self.response.get("course")
+        course_object = Course.objects.get(team=self.user.team, instructor=self.user, name=course)
+        try:
+            assessments = Assessment.objects.get(course=course_object)
+            return assessments
+        except Exception:
+            return None
+

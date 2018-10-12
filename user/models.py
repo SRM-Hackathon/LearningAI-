@@ -10,8 +10,8 @@ from mixins import TimeStampMixin
 class Team(TimeStampMixin):
 
     identity = models.CharField(max_length=20, primary_key=True)
-    name = models.CharField(max_length=80)
-    access_token = models.CharField(max_length=30)
+    name = models.CharField(max_length=80, null=True)
+    access_token = models.CharField(max_length=30, null=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -20,6 +20,7 @@ class Team(TimeStampMixin):
 class PlatformUser(TimeStampMixin):
 
     identity = models.CharField(max_length=20, primary_key=True)
+    channel_id = models.CharField(null=True, max_length=20)
     data = JSONField(null=True)
 
     teams = models.ManyToManyField(
