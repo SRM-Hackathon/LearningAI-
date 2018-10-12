@@ -16,8 +16,7 @@ class TaskResponses:
 class SessionResponses:
 
     @classmethod
-    def total_time_spent_on_task(cls, task, duration_spent):
-        title = "Task stats"
+    def time_stats_response(cls, title, task, duration_spent):
         task_name = task.tag.name
         tag_name = task.tag.name
         deadline = task.assessment.scheduled_at
