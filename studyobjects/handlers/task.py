@@ -9,11 +9,11 @@ from user.models import TeamMembership
 from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow
 from bot_messages.responses import TaskResponses
 
+
 class TaskHandler(IntentHandler):
     def __init__(self, intent_response_dict, user, action):
+        self.user_environment = UserEnvironment.objects.get(user=user)
         super().__init__(intent_response_dict, user, action)
-        import ipdb;ipdb.set_trace();
-        self.user_environment = UserEnvironment.objects.get(user=self.user)
 
     def get_object(self):
         course_name = self.response.get("course")
@@ -29,7 +29,6 @@ class TaskHandler(IntentHandler):
         name = self.response["name"]
         formatted_task_name = slugify(self.response["name"])
         eta = get_displaced_time_from_duration_entity(timezone.now(), self.response["eta"])
-
         assessment = self.user_environment.assessment
         tag = self.user_environment.tag
         Task.objects.get_or_create(

@@ -13,8 +13,8 @@ class SessionHandler(IntentHandler):
     """
 
     def __init__(self, intent_response_dict, user, action):
-        super().__init__(intent_response_dict, user, action)
         self.get_environment()
+        super().__init__(intent_response_dict, user, action)
 
     def get_environment(self):
         self.user_environment = UserEnvironment.objects.get(user=self.user)
