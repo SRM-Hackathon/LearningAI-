@@ -77,7 +77,7 @@ class UserEnvironment(TimeStampMixin):
     tag = models.ForeignKey(Tag, null=True, blank=True, on_delete=models.PROTECT)
 
 
-class Session(TimeStampMixin):
+class UserSession(TimeStampMixin):
     BREAK_TERMINATION = "BR"
     NORMAL_TERMINATION = "NOR"
 
