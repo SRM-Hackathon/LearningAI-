@@ -13,6 +13,7 @@ from user.models import TeamMembership
 @csrf_exempt
 def send_to_dialogflow(request):
     # Send to Dialogflow and receive response
+    prepare_data_for_user()
     payload = json.loads(request.body)
     team_id = payload["team"]
     user_id = payload["user"]
