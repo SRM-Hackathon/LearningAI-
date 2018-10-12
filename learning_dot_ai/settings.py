@@ -127,3 +127,9 @@ STATIC_URL = '/static/'
 DIALOGFLOW_SESSION_CLIENT = dialogflow_v2.SessionsClient.from_service_account_json('service-account.json')
 DIALOGFLOW_PROJECT = "newagent-d3de5"
 CLIENT_ACCESS_TOKEN = "31a8f31490084201adbbe08292e8e99e"
+DEVELOPER_ACCESS_TOKEN = "8b7d566307564578a565274269c29f6a"
+DEVELOPER_HEADERS = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Authorization': 'Bearer {0}'.format(DEVELOPER_ACCESS_TOKEN)
+}
+ENTITY_ADDITION_URL = "https://api.api.ai/v1/entities/{0}/entries?v=20150910"

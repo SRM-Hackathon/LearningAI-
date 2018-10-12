@@ -1,3 +1,4 @@
+from django.utils import timezone
 from factory import SubFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText, FuzzyDateTime
@@ -12,7 +13,6 @@ class CourseFactory(DjangoModelFactory):
         model = Course
 
     name = FuzzyText()
-
 
     instructor = SubFactory(TeamMembershipFactory)
     team = SubFactory(TeamFactory)
@@ -35,7 +35,7 @@ class AssessmentFactory(DjangoModelFactory):
 
     name = FuzzyText()
     description = FuzzyText()
-    scheduled_at = FuzzyDateTime()
+    scheduled_at = FuzzyDateTime(start_dt=timezone.now())
 
     course = SubFactory(CourseFactory)
     created_by = SubFactory(TeamMembershipFactory)
