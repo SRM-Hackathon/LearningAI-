@@ -9,10 +9,11 @@ from user.models import TeamMembership
 from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow
 from bot_messages.responses import TaskResponses
 
+
 class TaskHandler(IntentHandler):
     def __init__(self, intent_response_dict, user, action):
+        self.user_environment = UserEnvironment.objects.get(user=user)
         super().__init__(intent_response_dict, user, action)
-        self.user_environment = UserEnvironment.objects.get(user=self.user)
 
     def get_object(self):
         course_name = self.response.get("course")
@@ -28,7 +29,6 @@ class TaskHandler(IntentHandler):
         name = self.response["name"]
         formatted_task_name = slugify(self.response["name"])
         eta = get_displaced_time_from_duration_entity(timezone.now(), self.response["eta"])
-
         assessment = self.user_environment.assessment
         tag = self.user_environment.tag
         Task.objects.get_or_create(
@@ -72,12 +72,14 @@ class TaskHandler(IntentHandler):
                 task.name, dest_status
             )
 
-    def detail(self):
+    def task_detail(self):
+        # task_detail
         task = self.get_object()
         return dict(task.values_list())
 
-    def list_all_tasks(self):
-        tasks = Task.objets.filter(
+    def task_listall(self):
+        # added in intent dialog flow
+        tasks = Task.objects.filter(
             student=self.user,
             assessment=self.user_environment.assessment,
             tag=self.user_environment.tag
@@ -85,8 +87,9 @@ class TaskHandler(IntentHandler):
         formatted_task_names = format_tasks(tasks)
         return formatted_task_names
 
-    def list_todo(self):
-        tasks = Task.objets.filter(
+    def task_listtodo(self):
+        # added in intent dialog flow
+        tasks = Task.objects.filter(
             student=self.user,
             state=Task.TODO,
             assessment=self.user_environment.assessment,
@@ -95,8 +98,9 @@ class TaskHandler(IntentHandler):
         formatted_task_names = format_tasks(tasks)
         return formatted_task_names
 
-    def list_inprogress(self):
-        tasks = Task.objets.filter(
+    def task_listinprogress(self):
+        # added in intent dialog flow
+        tasks = Task.objects.filter(
             student=self.user,
             state=Task.IN_PROGRESS,
             assessment=self.user_environment.assessment,
@@ -105,8 +109,9 @@ class TaskHandler(IntentHandler):
         formatted_task_names = format_tasks(tasks)
         return formatted_task_names
 
-    def list_completed(self):
-        tasks = Task.objets.filter(
+    def task_listcompleted(self):
+        # added in intent dialog flow
+        tasks = Task.objects.filter(
             student=self.user,
             state=Task.COMPLETED,
             assessment=self.user_environment.assessment,
