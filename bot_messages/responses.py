@@ -1,3 +1,6 @@
+from bot_messages.utils import get_task_detail_display_attachment
+from bot_messages.utils import days_hours_minutes, format_date_hours_minutes_worked
+
 class TaskResponses:
 
     @classmethod
@@ -11,4 +14,22 @@ class TaskResponses:
         )
 
 class SessionResponses:
-    pass
+
+    @classmethod
+    def total_time_spent_on_task(cls, task, duration_spent):
+        title = "Task stats"
+        task_name = task.tag.name
+        tag_name = task.tag.name
+        deadline = task.assessment.scheduled_at
+        student = task.student.platform_user
+        eta = task.eta
+        completion_value = task.progress
+        duration_spent_response = format_date_hours_minutes_worked(
+            days_hours_minutes(duration_spent)
+        )
+        return get_task_detail_display_attachment(
+            title, task_name, tag_name, deadline, student, eta, completion_value, duration_spent_response
+        )
+
+
+

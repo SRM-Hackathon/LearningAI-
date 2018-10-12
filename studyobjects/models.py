@@ -40,6 +40,7 @@ class Assessment(TimeStampMixin):
     tags = models.ManyToManyField(Tag)
     created_by = models.ForeignKey(TeamMembership, on_delete=models.PROTECT)
 
+
     class Meta:
         unique_together = ('course', 'name')
 

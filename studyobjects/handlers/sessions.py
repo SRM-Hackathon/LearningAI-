@@ -85,5 +85,4 @@ def time_spent_on_task(task_name, user):
         values('start_time', 'end_time')
     for session_time in user_session:
         duration_spent = duration_spent + (session_time['end_time']-session_time['start_time'])
-
     return duration_spent
