@@ -12,6 +12,7 @@ from bot_messages.responses import TaskResponses
 class TaskHandler(IntentHandler):
     def __init__(self, intent_response_dict, user, action):
         super().__init__(intent_response_dict, user, action)
+        import ipdb;ipdb.set_trace();
         self.user_environment = UserEnvironment.objects.get(user=self.user)
 
     def get_object(self):
@@ -77,7 +78,7 @@ class TaskHandler(IntentHandler):
         return dict(task.values_list())
 
     def list_all_tasks(self):
-        tasks = Task.objets.filter(
+        tasks = Task.objects.filter(
             student=self.user,
             assessment=self.user_environment.assessment,
             tag=self.user_environment.tag
@@ -86,7 +87,7 @@ class TaskHandler(IntentHandler):
         return formatted_task_names
 
     def list_todo(self):
-        tasks = Task.objets.filter(
+        tasks = Task.objects.filter(
             student=self.user,
             state=Task.TODO,
             assessment=self.user_environment.assessment,
@@ -96,7 +97,7 @@ class TaskHandler(IntentHandler):
         return formatted_task_names
 
     def list_inprogress(self):
-        tasks = Task.objets.filter(
+        tasks = Task.objects.filter(
             student=self.user,
             state=Task.IN_PROGRESS,
             assessment=self.user_environment.assessment,
@@ -106,7 +107,7 @@ class TaskHandler(IntentHandler):
         return formatted_task_names
 
     def list_completed(self):
-        tasks = Task.objets.filter(
+        tasks = Task.objects.filter(
             student=self.user,
             state=Task.COMPLETED,
             assessment=self.user_environment.assessment,
