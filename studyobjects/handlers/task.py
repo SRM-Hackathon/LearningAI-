@@ -6,7 +6,7 @@ from django.utils import timezone
 from studyobjects.base import IntentHandler
 from studyobjects.models import Course, UserEnvironment, Task
 from user.models import TeamMembership
-from utils import get_displaced_time_from_duration_entity
+from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow
 
 
 class TaskHandler(IntentHandler):
@@ -23,8 +23,9 @@ class TaskHandler(IntentHandler):
             return None
 
     def create(self):
+        name = self.response["name"]
         formatted_task_name = slugify(self.response["name"])
-        eta = get_displaced_time_from_duration_entity(self.response["eta"])
+        eta = get_displaced_time_from_duration_entity(timezone.now(), self.response["eta"])
         team = self.user.team
         user_environment = UserEnvironment.objects.get(user=self.user)
         assessment = user_environment.assessment
@@ -36,6 +37,7 @@ class TaskHandler(IntentHandler):
             student=self.user,
             eta=eta
         )
+        add_entity_in_dialogflow("Task", formatted_task_name, [name, ])
         return True
 
 
