@@ -1,3 +1,5 @@
+import types
+
 from studyobjects.base import IntentHandler
 from studyobjects.models import Course
 from studyobjects.permissions.course import CourseHandlerCustomPermissions
@@ -10,7 +12,7 @@ class CourseHandler(IntentHandler):
         permission_class = CourseHandlerCustomPermissions
 
     def create(self):
-        course_name = self.response.get("course")
+        course_name = self.response.get("name")
         course_instructor_id = self.response.get("instructor")
         team = self.user.team
         instructor_membership = TeamMembership.objects.get(team=team, platform_user__identity=course_instructor_id)
@@ -20,3 +22,4 @@ class CourseHandler(IntentHandler):
             defaults={'instructor': instructor_membership}
         )
         return True
+

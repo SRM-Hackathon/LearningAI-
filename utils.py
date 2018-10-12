@@ -1,4 +1,5 @@
 import json
+import re
 
 import apiai
 
@@ -43,3 +44,12 @@ def prepare_data_for_user(payload):
     user, _ = User.objects.get_or_create(username=identity)
     pu, _ = PlatformUser.objects.get_or_create(identity=identity, user=user)
     TeamMembership.objects.get_or_create(platform_user=pu, team=team)
+
+
+def parse_message(message):
+    match = re.search("(?<=<@)\w+(?<!>)", message)
+    if match:
+        print("I am here")
+        message = re.sub("(<@\w+>)", match.group(0), message)
+    print(message)
+    return message
