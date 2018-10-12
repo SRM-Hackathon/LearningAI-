@@ -1,4 +1,5 @@
 'use strict';
+    var apiCall = require("./apiCall");
 
     var Botkit = require('botkit');
     var request = require('request');
@@ -32,6 +33,16 @@
     });
 
     controller.hears('(.*)', ['direct_message','direct_mention','mention'],function(bot,message) {
+                var requestDict = {};
+        requestDict["message"] = message;
+
+        
+        var apiUrl = baseUrl + "messages/send";
+        apiCall.callDjangoAPI(requestDict, apiUrl, function(response){
+            console.log(response);
+            theConnectionsDict[teamId].reply(message, response);
+        });
+
     });
 
 
