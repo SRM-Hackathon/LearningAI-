@@ -9,6 +9,7 @@ import requests
 from django.contrib.auth.models import User
 
 from learning_dot_ai.settings import CLIENT_ACCESS_TOKEN, DEVELOPER_ACCESS_TOKEN, ENTITY_ADDITION_URL, DEVELOPER_HEADERS
+from studyobjects.models import Course, Tag
 from user.factory import UserFactory
 from user.models import Team, PlatformUser, TeamMembership
 
