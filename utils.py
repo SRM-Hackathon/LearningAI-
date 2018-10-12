@@ -9,7 +9,7 @@ import requests
 from django.contrib.auth.models import User
 
 from learning_dot_ai.settings import CLIENT_ACCESS_TOKEN, DEVELOPER_ACCESS_TOKEN, ENTITY_ADDITION_URL, DEVELOPER_HEADERS
-from studyobjects.models import Course, Tag
+from studyobjects.models import Course, Tag, UserEnvironment, Assessment
 from user.factory import UserFactory
 from user.models import Team, PlatformUser, TeamMembership
 
@@ -44,7 +44,10 @@ def prepare_data_for_user(payload):
     team, _ = Team.objects.get_or_create(identity=team)
     user, _ = User.objects.get_or_create(username=identity)
     pu, _ = PlatformUser.objects.get_or_create(identity=identity, user=user)
-    TeamMembership.objects.get_or_create(platform_user=pu, team=team)
+    tm, created = TeamMembership.objects.get_or_create(platform_user=pu, team=team)
+    assessment = Assessment.objects.all().order_by('scheduled_at').first()
+    if assessment:
+        associate_course_with_users(assessment=assessment)
 
 
 def parse_message(message):
@@ -52,5 +55,10 @@ def parse_message(message):
     if match:
         print("I am here")
         message = re.sub("(<@\w+>)", match.group(0), message)
-    print(message)
     return message
+
+
+def associate_course_with_users(**kwargs):
+    memberships = TeamMembership.objects.all()
+    for member in memberships:
+        UserEnvironment.objects.update_or_create(user=member, defaults=kwargs)
