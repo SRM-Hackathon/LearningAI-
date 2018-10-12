@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.db import models
+from django.utils import timezone
 
 from mixins import TimeStampMixin
 from user.models import Team, PlatformUser, TeamMembership
@@ -57,6 +60,7 @@ class Task(TimeStampMixin):
     state = models.CharField(max_length=5, choices=STATE_CHOICES, default=TODO)
     description = models.TextField(blank=True, null=True)
     progress = models.PositiveIntegerField(default=0)
+    eta = models.DateTimeField(default=timezone.now() + timedelta(hours=1))
     
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
     student = models.ForeignKey(TeamMembership, on_delete=models.PROTECT)
