@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'user',
     'studyobjects',
     'bot_messages',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
