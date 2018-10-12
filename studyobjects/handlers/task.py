@@ -7,7 +7,7 @@ from studyobjects.base import IntentHandler
 from studyobjects.models import Course, UserEnvironment, Task
 from user.models import TeamMembership
 from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow
-
+from bot_messages.responses import TaskResponses
 
 class TaskHandler(IntentHandler):
 
@@ -41,5 +41,19 @@ class TaskHandler(IntentHandler):
         return True
 
 
-    def switch_state(self):
-        pass
+    def upgrade_state(self):
+        task_name = self.response["task"]
+        team_membership_user = self.user
+        user_environment = UserEnvironment.objects.get(user=self.user)
+        assessment = user_environment.assessment
+        task = Task.objects.get(assessment=assessment, name=task_name, student=team_membership_user)
+        dest_status = task.upgrade_state()
+        if dest_status is None:
+            return TaskResponses.upgrade_status_msg(
+                failure_msg="State of a completed task cannot upgraded."
+            )
+        else:
+            return TaskResponses.upgrade_status_msg(
+                task.name, dest_status
+            )
+

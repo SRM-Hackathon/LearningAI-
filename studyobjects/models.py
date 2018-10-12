@@ -66,8 +66,21 @@ class Task(TimeStampMixin):
     student = models.ForeignKey(TeamMembership, on_delete=models.PROTECT)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
+    def upgrade_state(self):
+
+        if self.state == Task.COMPLETED:
+            return None
+
+        elif self.state == Task.TODO:
+            self.state = Task.IN_PROGRESS
+
+        else:
+            self.state = Task.COMPLETED
+
+        return self.state
+
     class Meta:
-        unique_together = ('name', 'assessment')
+        unique_together = ('name', 'assessment', 'student')
 
 
 class UserEnvironment(TimeStampMixin):
