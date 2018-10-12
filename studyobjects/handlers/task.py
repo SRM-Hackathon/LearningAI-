@@ -4,8 +4,9 @@ from slugify import slugify
 from django.utils import timezone
 
 from studyobjects.base import IntentHandler
-from studyobjects.models import Course
+from studyobjects.models import Course, UserEnvironment, Task
 from user.models import TeamMembership
+from utils import get_displaced_time_from_duration_entity
 
 
 class TaskHandler(IntentHandler):
@@ -22,27 +23,17 @@ class TaskHandler(IntentHandler):
             return None
 
     def create(self):
-        task_name = self.response.get("name")
-        formatted_task_name = slugify(task_name)
-        eta = self.response.get("eta")
-        duration_magnitude = eta["amount"]
-        unit = eta["unit"]
-        # TODO(Sricharan) Make a utility for duration values.
-        if unit == 'h':
-            eta = timezone.now() + timedelta(hours=duration_magnitude)
-        elif unit == 'm':
-            eta = timezone.now() + timedelta(minutes=duration_magnitude)
-        print(eta)
-        print(formatted_task_name)
-        return
+        formatted_task_name = slugify(self.response["name"])
+        eta = get_displaced_time_from_duration_entity(self.response["eta"])
         team = self.user.team
-        instructor_membership = TeamMembership.objects.get(team=team, platform_user__identity=course_instructor_id)
-        Course.objects.get_or_create(
-            name=course_name,
-            team=team,
-            defaults={'instructor': instructor_membership}
+        user_environment = UserEnvironment.objects.get(user=self.user)
+        assessment = user_environment.assessment
+        tag = user_environment.tag
+        Task.objects.get_or_create(
+            name=formatted_task_name,
+            assessment=assessment,
+            tag=tag,
+            student=self.user,
+            eta=eta
         )
-        group, created = Group.objects.get_or_create(name=GROUP_COURSE_INSTRUCTORS)
-        group.team_memberships.add(instructor_membership)
-        group.save()
         return True

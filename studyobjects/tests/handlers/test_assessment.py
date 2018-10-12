@@ -3,6 +3,7 @@ from django.test import TestCase
 
 from constants import GROUP_ADMINS
 from studyobjects.factory import CourseFactory
+from studyobjects.factory import AssessmentFactory
 from studyobjects.handlers.assessment import AssessmentHandler
 from studyobjects.models import Assessment, Tag
 from user.factory import PlatformUserFactory, TeamMembershipFactory
@@ -33,4 +34,26 @@ class AssessmentHandlerTests(TestCase):
             name=name,
             course=course_object
         ).exists())
+
+    # def test_list_all_assessments(self):
+    #     team = TeamFactory()
+    #     user = UserFactory()
+    #     platform_user = PlatformUserFactory(user=user)
+    #     team_membership = TeamMembershipFactory(team=team, platform_user=platform_user)
+    #     course_object = CourseFactory(team=team, instructor=team_membership, name='maths')
+    #     date_time = '2019-10-06T10:00:00Z'
+    #     assessment = AssessmentFactory(course=course_object, created_by=team_membership, scheduled_at=date_time)
+    #     intent_response_dict = {
+    #         'course': 'maths'
+    #     }
+    #     assessments = AssessmentHandler(intent_response_dict, team_membership, "list_assessments")
+    #     print(assessments)
+    #     print(Assessment.objects.get(
+    #         course=course_object
+    #     ))
+    #     self.assertEqual(Assessment.objects.get(
+    #         course=course_object
+    #     ), assessments)
+
+
 

@@ -27,8 +27,8 @@ class AssessmentHandler(IntentHandler):
         course = self.response.get("course")
         course_object = Course.objects.get(team=self.user.team, instructor=self.user, name=course)
         try:
-            self.assessments = Assessment.objects.get(course=course_object)
-            return self.assessments
+            assessments = Assessment.objects.get(course=course_object)
+            return assessments
         except Exception:
             return None
 
