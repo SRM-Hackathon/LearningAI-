@@ -7,10 +7,15 @@ class IntentHandler:
         self.response = intent_response_dict
         self.user = user
         self.action = action
+
+    def execute(self):
+        actual_func = None
         for key, value in self.__class__.__dict__.items():
             if isinstance(value, types.FunctionType):
-                if action == value.__name__:
-                    value(self)
+                if self.action == value.__name__:
+                    actual_func = value
+                    break
+        return actual_func(self)
 
 
 class PermissionsRunner:
