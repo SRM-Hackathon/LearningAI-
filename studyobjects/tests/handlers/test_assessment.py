@@ -1,26 +1,36 @@
+from django.contrib.auth.models import Group
 from django.test import TestCase
 
-from constants import GROUP_COURSE_INSTRUCTORS
-from studyobjects.handlers.assessment import create_assessment
+from constants import GROUP_ADMINS
+from studyobjects.factory import CourseFactory
+from studyobjects.handlers.assessment import AssessmentHandler
+from studyobjects.models import Assessment, Tag
 from user.factory import PlatformUserFactory, TeamMembershipFactory
 from user.factory import TeamFactory
 from user.factory import UserFactory
 
+class AssessmentHandlerTests(TestCase):
 
-# def create_assessment(parameter_dict, team_membership):
-#     course = parameter_dict['course'].string_value
-#     name = parameter_dict['name'].string_value
-#     list_tags = parameter_dict['tags'].list_value.values
-#     tags = []
-#     for item in list_tags:
-#         tags.append(item.string_value)
-#     datetime = parameter_dict['datetime'].struct_value.fields['date_time'].string_value
-#     Assessment.objects.create(
-#         course=course,
-#         name=name,
-#         tags=tags,
-#         scheduled_at=datetime,
-#         created_by=team_membership
-#     )
-#     print(parameter_dict)
+    def test_create_assessment_assert_assessment_creation(self):
+        team = TeamFactory()
+        user = UserFactory()
+        platform_user = PlatformUserFactory(user=user)
+        team_membership = TeamMembershipFactory(team=team, platform_user=platform_user)
+        admin_group = Group.objects.create(name=GROUP_ADMINS)
+        team_membership.groups.add(admin_group)
+        team_membership.save()
+        course_object = CourseFactory(team=team, instructor=team_membership, name='maths')
+        Tag.objects.create(name='Trigonometry', course=course_object)
+        Tag.objects.create(name='Arithmetic', course=course_object)
+        intent_response_dict = {
+            'course': 'maths',
+            'datetime': '2019-10-06T10:00:00Z',
+            'tags': ['Trigonometry', 'Arithmetic']
+        }
+        AssessmentHandler(intent_response_dict, team_membership, "create")
+        name = intent_response_dict['course'] + '_' + intent_response_dict['datetime']
+        self.assertTrue(Assessment.objects.filter(
+            name=name,
+            course=course_object
+        ).exists())
 
