@@ -35,6 +35,7 @@ def add_entity_in_dialogflow(entity_type, entity_name, synonyms):
         data=serialized_dict,
         headers=DEVELOPER_HEADERS
     )
+    print(entity_request.status_code)
 
 
 def prepare_data_for_user(payload):
@@ -62,3 +63,6 @@ def associate_course_with_users(**kwargs):
     memberships = TeamMembership.objects.all()
     for member in memberships:
         UserEnvironment.objects.update_or_create(user=member, defaults=kwargs)
+
+def render_default_response(response_results):
+    return response_results['fulfillment']['speech']

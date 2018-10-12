@@ -8,7 +8,7 @@ from bot_messages.utils import detect_intent_with_text_inputs
 from bot_messages.validators import Validators
 from studyobjects.handlers import *
 from user.models import TeamMembership
-from utils import prepare_data_for_user, parse_message
+from utils import prepare_data_for_user, parse_message, render_default_response
 
 
 @csrf_exempt
@@ -24,8 +24,7 @@ def send_to_dialogflow(request):
     response = detect_intent_with_text_inputs(text, user_id)
     query_response = response["result"]
     if not Validators(query_response).validate():
-        # TODO(Sricharan) Find the suitable response
-        return HttpResponse()
+        return HttpResponse(render_default_response(query_response), status=200)
     try:
         user = TeamMembership.objects.get(platform_user__pk=user_id, team__pk=team_id)
     except ObjectDoesNotExist:
@@ -36,4 +35,4 @@ def send_to_dialogflow(request):
     handler = response_handler_and_action[:handler_action_delimiter_index]
     action = response_handler_and_action[handler_action_delimiter_index + 1:]
     response = eval(handler)(query_response["parameters"], user, action).execute()
-    return HttpResponse(response, status=200)
+    return HttpResponse(render_default_response(query_response), status=200)
