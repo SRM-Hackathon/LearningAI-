@@ -31,7 +31,7 @@ class SessionHandler(IntentHandler):
 
     def get_object(self):
         try:
-            self.session = UserSession.objects.get(user=self.user, task=self.task).last()
+            self.session = UserSession.objects.get(user=self.user, task=self.task, assessment=self.user_environment.assessment, tag=self.user_environment.tag).last()
             return self.session
         except ObjectDoesNotExist:
             return None
