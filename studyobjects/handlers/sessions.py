@@ -58,7 +58,7 @@ class SessionHandler(IntentHandler):
         user_session = self.get_object()
         if user_session:
             user_session.end_time = datetime.datetime.now()
-            user_session.termination_type =  UserSession.NORMAL_TERMINATION
+            user_session.termination_type = UserSession.NORMAL_TERMINATION
             user_session.save()
             return True
 
@@ -70,3 +70,20 @@ class SessionHandler(IntentHandler):
             self.create()
         elif self.session.termination_type == UserSession.BREAK_TERMINATION:
             self.create(is_master=False)
+
+
+def time_spent_on_task(task_name, user):
+    duration_spent = 0
+    user_environment = UserEnvironment.objects.get(user=user)
+    task = Task.objects.get(
+        task_name=task_name,
+        user=user,
+        assessment=user_environment.assessment
+    )
+    user_session = UserSession.objects.filter(user=user, task=task).\
+        exclude(termination_type=None, start_time=None, end_time=None).\
+        values('start_time', 'end_time')
+    for session_time in user_session:
+        duration_spent = duration_spent + (session_time['end_time']-session_time['start_time'])
+
+    return duration_spent

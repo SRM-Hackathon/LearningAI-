@@ -41,6 +41,34 @@ class TaskHandler(IntentHandler):
         add_entity_in_dialogflow("Task", formatted_task_name, [name, ])
         return True
 
+    def get_task_object(self):
+        name = self.response["name"]
+        if not name:
+            return None
+        try:
+            task = Task.objets.get(
+                student=self.user,
+                name=name,
+                assessment=self.user_environment.assessment,
+                tag=self.user_environment.tag
+            )
+            return task
+        except Task.DoesNotExist:
+            return "Task is not available"
+
+    def detail(self):
+        task = self.get_object()
+        return dict(task.values_list())
+
+    def list_all_tasks(self):
+        tasks = Task.objets.filter(
+            student=self.user,
+            assessment=self.user_environment.assessment,
+            tag=self.user_environment.tag
+        ).values_list('name', flat=True)
+        formatted_task_names = format_tasks(tasks)
+        return formatted_task_names
+
     def list_todo(self):
         tasks = Task.objets.filter(
             student=self.user,
@@ -48,7 +76,7 @@ class TaskHandler(IntentHandler):
             assessment=self.user_environment.assessment,
             tag=self.user_environment.tag
         ).values_list('name', flat=True)
-        formatted_task_names = "{}".format("\n".join(tasks))
+        formatted_task_names = format_tasks(tasks)
         return formatted_task_names
 
     def list_inprogress(self):
@@ -58,7 +86,7 @@ class TaskHandler(IntentHandler):
             assessment=self.user_environment.assessment,
             tag=self.user_environment.tag
         ).values_list('name', flat=True)
-        formatted_task_names = "{}".format("\n".join(tasks))
+        formatted_task_names = format_tasks(tasks)
         return formatted_task_names
 
     def list_completed(self):
@@ -68,5 +96,9 @@ class TaskHandler(IntentHandler):
             assessment=self.user_environment.assessment,
             tag=self.user_environment.tag
         ).values_list('name', flat=True)
-        formatted_task_names = "{}".format("\n".join(tasks))
+        formatted_task_names = format_tasks(tasks)
         return formatted_task_names
+
+
+def format_tasks(tasks):
+    return "{}".format("\n".join(tasks))
