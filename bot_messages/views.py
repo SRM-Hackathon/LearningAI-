@@ -39,5 +39,4 @@ def send_to_dialogflow(request):
     handler = response_handler_and_action[:handler_action_delimiter_index]
     action = response_handler_and_action[handler_action_delimiter_index + 1:]
     print("I am here")
-    return
     status, response = eval(handler)(query_response["parameters"], user, action)

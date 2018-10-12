@@ -106,7 +106,7 @@ class TaskHandler(IntentHandler):
         return formatted_task_names
 
     def list_completed(self):
-        tasks = Task.objets.filter(
+        tasks = Task.objects.filter(
             student=self.user,
             state=Task.COMPLETED,
             assessment=self.user_environment.assessment,

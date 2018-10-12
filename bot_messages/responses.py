@@ -9,3 +9,6 @@ class TaskResponses:
         return "The state of your task, {task_name} is moved to {dest}".format(
             task_name=task_name,  dest=dest_state.lower(),
         )
+
+class SessionResponses:
+    pass
