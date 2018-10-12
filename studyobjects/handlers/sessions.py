@@ -3,6 +3,30 @@ from django.core.exceptions import ObjectDoesNotExist
 from studyobjects.base import IntentHandler
 from studyobjects.models import Task, UserEnvironment, UserSession
 import datetime
+from bot_messages.responses import SessionResponses
+from django.db.models import Q
+
+
+def get_total_time_spent(user_sessions):
+    duration_spent = 0
+    for session_time in user_sessions:
+        duration_spent = duration_spent + (session_time['end_time'] - session_time['start_time'])
+
+
+def time_spent_on_task(task_name, user):
+    user_environment = UserEnvironment.objects.get(user=user)
+    task = Task.objects.get(
+        task_name=task_name,
+        user=user,
+        assessment=user_environment.assessment
+    )
+    user_sessions = UserSession.objects.filter(user=user, task=task).\
+        exclude(termination_type=None, start_time=None, end_time=None).\
+        values('start_time', 'end_time')
+
+    total_duration_spent = get_total_time_spent(user_sessions)
+    return task, total_duration_spent
+
 
 
 class SessionHandler(IntentHandler):
@@ -62,6 +86,24 @@ class SessionHandler(IntentHandler):
             user_session.save()
             return True
 
+    def get_time_spent_on_current_session(self):
+        task = self.get_task()
+        user = self.user
+        assessment = task.assessment
+        current_master_session = UserSession.objects.filter(
+            user=user, task=task, assessment=assessment ,is_master=True
+        ).last()
+        user_sessions = UserSession.objects.filter(
+            user=user, task=task, assessment=assessment, start_time__gte=current_master_session.start_time
+        ).exclude(
+            termination_type=None, start_time=None, end_time=None
+        ).values('start_time', 'end_time')
+        time_spent_in_current_session = get_total_time_spent(user_sessions)
+        response = SessionResponses.end_session_msg(
+            task.name, time_spent_in_current_session
+        )
+        return response
+
     def resume(self):
         # if previous session is break create new session
         # if previous session is not break create a new master session
@@ -71,18 +113,9 @@ class SessionHandler(IntentHandler):
         elif self.session.termination_type == UserSession.BREAK_TERMINATION:
             self.create(is_master=False)
 
-
-def time_spent_on_task(task_name, user):
-    duration_spent = 0
-    user_environment = UserEnvironment.objects.get(user=user)
-    task = Task.objects.get(
-        task_name=task_name,
-        user=user,
-        assessment=user_environment.assessment
-    )
-    user_session = UserSession.objects.filter(user=user, task=task).\
-        exclude(termination_type=None, start_time=None, end_time=None).\
-        values('start_time', 'end_time')
-    for session_time in user_session:
-        duration_spent = duration_spent + (session_time['end_time']-session_time['start_time'])
-    return duration_spent
+    def time_stats(self):
+        task_name = self.response["task"]
+        user = self.user
+        task, duration_spent = time_spent_on_task(task_name, user)
+        response = SessionResponses.total_time_spent_on_task(task, duration_spent)
+        return response

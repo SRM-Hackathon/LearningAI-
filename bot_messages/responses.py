@@ -1,5 +1,5 @@
 from bot_messages.utils import get_task_detail_display_attachment
-from bot_messages.utils import days_hours_minutes, format_date_hours_minutes_worked
+from bot_messages.utils import days_hours_minutes, format_date_hours_minutes_worked, format_end_session_response
 
 class TaskResponses:
 
@@ -31,5 +31,7 @@ class SessionResponses:
             title, task_name, tag_name, deadline, student, eta, completion_value, duration_spent_response
         )
 
-
-
+    @classmethod
+    def end_session_msg(cls, task_name, duration_spent):
+        days, hours, minutes = days_hours_minutes(duration_spent)
+        return format_end_session_response(days, hours, minutes, task_name)
