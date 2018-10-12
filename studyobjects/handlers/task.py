@@ -72,11 +72,13 @@ class TaskHandler(IntentHandler):
                 task.name, dest_status
             )
 
-    def detail(self):
+    def task_detail(self):
+        # task_detail
         task = self.get_object()
         return dict(task.values_list())
 
-    def list_all_tasks(self):
+    def task_listall(self):
+        # added in intent dialog flow
         tasks = Task.objects.filter(
             student=self.user,
             assessment=self.user_environment.assessment,
@@ -85,7 +87,8 @@ class TaskHandler(IntentHandler):
         formatted_task_names = format_tasks(tasks)
         return formatted_task_names
 
-    def list_todo(self):
+    def task_listtodo(self):
+        # added in intent dialog flow
         tasks = Task.objects.filter(
             student=self.user,
             state=Task.TODO,
@@ -95,7 +98,8 @@ class TaskHandler(IntentHandler):
         formatted_task_names = format_tasks(tasks)
         return formatted_task_names
 
-    def list_inprogress(self):
+    def task_listinprogress(self):
+        # added in intent dialog flow
         tasks = Task.objects.filter(
             student=self.user,
             state=Task.IN_PROGRESS,
@@ -105,7 +109,8 @@ class TaskHandler(IntentHandler):
         formatted_task_names = format_tasks(tasks)
         return formatted_task_names
 
-    def list_completed(self):
+    def task_listcompleted(self):
+        # added in intent dialog flow
         tasks = Task.objects.filter(
             student=self.user,
             state=Task.COMPLETED,
