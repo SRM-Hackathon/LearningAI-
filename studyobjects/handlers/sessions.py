@@ -62,21 +62,26 @@ class SessionHandler(IntentHandler):
 
     def create(self, is_master=True):
         task = self.get_task()
+        response = SessionResponses.create_msg(task)
         if task:
             self.session = UserSession.objects.create(
                 user=self.user,
                 task=task,
                 is_master=is_master
             )
-            return True
+            return response.get("SUCCESS")
+        return response.get("FAILURE")
 
     def breaksession(self):
+        task = self.get_task()
         user_session = self.get_object()
+        response = SessionResponses.break_session_msg(task)
         if user_session:
             user_session.end_time = datetime.datetime.now()
             user_session.termination_type = UserSession.BREAK_TERMINATION
             user_session.save()
-            return True
+            return response.get("SUCCESS")
+        return response.get("FAILURE")
 
     def end(self):
         user_session = self.get_object()
@@ -84,7 +89,20 @@ class SessionHandler(IntentHandler):
             user_session.end_time = datetime.datetime.now()
             user_session.termination_type = UserSession.NORMAL_TERMINATION
             user_session.save()
-            return True
+            task = self.get_task()
+            user = self.user
+            assessment = task.assessment
+            current_master_session = UserSession.objects.filter(
+                user=user, task=task, assessment=assessment, is_master=True
+            ).last()
+            user_sessions = UserSession.objects.filter(
+                user=user, task=task, assessment=assessment, start_time__gte=current_master_session.start_time
+            ).exclude(
+                termination_type=None, start_time=None, end_time=None
+            ).values('start_time', 'end_time')
+            time_spent_in_current_session = get_total_time_spent(user_sessions)
+            response = SessionResponses.end_session_msg(task.name, time_spent_in_current_session)
+            return response
 
     def get_time_spent_on_current_session(self):
         task = self.get_task()
@@ -99,8 +117,8 @@ class SessionHandler(IntentHandler):
             termination_type=None, start_time=None, end_time=None
         ).values('start_time', 'end_time')
         time_spent_in_current_session = get_total_time_spent(user_sessions)
-        response = SessionResponses.end_session_msg(
-            task.name, time_spent_in_current_session
+        response = SessionResponses.time_stats_response(
+            "Time spent in current session", task.name, time_spent_in_current_session
         )
         return response
 
@@ -108,14 +126,17 @@ class SessionHandler(IntentHandler):
         # if previous session is break create new session
         # if previous session is not break create a new master session
         user_session = self.get_object()
+        task = self.task()
         if user_session.termination_type is None or user_session.termination_type == UserSession.NORMAL_TERMINATION:
             self.create()
         elif self.session.termination_type == UserSession.BREAK_TERMINATION:
             self.create(is_master=False)
+        response = SessionResponses.resume_session_msg(task.name)
+        return response
 
     def time_stats(self):
         task_name = self.response["task"]
         user = self.user
         task, duration_spent = time_spent_on_task(task_name, user)
-        response = SessionResponses.total_time_spent_on_task(task, duration_spent)
+        response = SessionResponses.time_stats_response("Time stats", task, duration_spent)
         return response
