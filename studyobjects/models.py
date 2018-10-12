@@ -110,6 +110,7 @@ class UserSession(TimeStampMixin):
 
 
 class Doubts(TimeStampMixin):
+    title = models.CharField(max_length=100)
     description = models.TextField()
     is_clarified = models.BooleanField(default=False)
 
