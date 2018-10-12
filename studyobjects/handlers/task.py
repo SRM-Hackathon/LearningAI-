@@ -37,3 +37,7 @@ class TaskHandler(IntentHandler):
             eta=eta
         )
         return True
+
+
+    def switch_state(self):
+        pass
