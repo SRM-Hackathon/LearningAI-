@@ -3,7 +3,7 @@ from studyobjects.base import IntentHandler
 # TODO
 # 1. list doubts asked by me
 # 2. list doubts asked by friends (all, clarified, not calrified)
-# 3. give solution to doubt (once solution is given responed to the respected person)
+# 3. give solution to doubt (once solution is given respond to the respected person)
 # 4. see solution solved by friends
 # 5. create doubt - only for that environment
 # 6. assign doubt when doubt created will be assigned to anyone

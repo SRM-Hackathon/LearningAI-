@@ -55,3 +55,10 @@ class SessionResponses:
             "SUCCESS": "Awesome.. Your are resuming your session on {}".format(task.name),
             "FAILURE": "Couldn't find your session. Check if a task by the name {} exists".format(task.name)
         }
+
+
+class DoubtResponses:
+
+    @classmethod
+    def list_unsolved_doubts_msg(cls, doubts):
+        pass
