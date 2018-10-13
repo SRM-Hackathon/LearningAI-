@@ -43,9 +43,9 @@ def send_to_dialogflow(request):
     if isinstance(response, bool):
         return HttpResponse(render_default_response(query_response), status=200)
     else:
-        print(response)
         response = json.dumps(response)
         return HttpResponse(response, status=200)
+
 
 @csrf_exempt
 def handle_slack_interaction(request):

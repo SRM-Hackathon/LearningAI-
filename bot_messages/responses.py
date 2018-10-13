@@ -81,6 +81,13 @@ class SessionResponses:
             FAILURE: "Couldn't find your session. Check if a task by the name {} exists".format(task.name)
         }
 
+    @classmethod
+    def list_tasks_msg(cls, name):
+        return {
+            SUCCESS: "Available tasks are \n{}".format(name),
+            FAILURE: "You don't have any tasks in the {}".format(name)
+        }
+
 
 class DoubtResponses:
 
@@ -90,12 +97,3 @@ class DoubtResponses:
             return "You don't have any doubts to answer"
 
         return build_doubt_attachment_payload(doubts, "Doubts")
-
-    @classmethod
-    def list_tasks_msg(cls, name):
-        return {
-            SUCCESS: "Available tasks are \n{}".format(name),
-            FAILURE: "You don't have any tasks in the {}".format(name)
-        }
-
-

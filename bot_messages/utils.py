@@ -81,6 +81,35 @@ def create_interactive_message(text, attachment):
         "text": text
     }
 
+def create_student_poor_performance_payload(user):
+    STANDARD_COLOR_CODE = "#FF0000"
+    unique_id = format_user_id(user)
+    analysis = """I find that he is not tracking consistently. 
+    Takes up a high number of tasks, but does'nt complete them.
+    Looks especially weak in Algebra."""
+    payload = {
+        "color": STANDARD_COLOR_CODE,
+        "title": "The performance of this student is going down",
+        "fields": [
+            {
+                "title": "Student name",
+                "value": unique_id,
+                "short": "false"
+            },
+            {
+                "title": "Score",
+                "value": "27",
+                "short": "false"
+            },
+            {
+                "title": "Analysis",
+                "value": analysis,
+                "short": "true"
+            },
+        ],
+        "footer": "Zoey Analytics"
+    }
+    return payload
 
 def get_task_detail_display_attachment(title, task_name, tag_name, deadline, student, eta, completion_value, time_spent):
     STANDARD_COLOR_CODE = "#164bdd"

@@ -47,7 +47,7 @@ def prepare_data_for_user(payload):
     user, _ = User.objects.get_or_create(username=identity)
     pu, _ = PlatformUser.objects.update_or_create(identity=identity, user=user, defaults={'channel_id': channel})
     tm, created = TeamMembership.objects.get_or_create(platform_user=pu, team=team)
-    assessment = Assessment.objects.all().order_by('scheduled_at').first()
+    assessment = Assessment.objects.all().order_by('-scheduled_at').first()
     if assessment:
         associate_course_with_users(assessment=assessment)
 
