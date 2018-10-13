@@ -4,6 +4,10 @@ import json
 from django.conf import settings
 
 
+def format_user_id(unique_id):
+    return "<@{0}>".format(unique_id)
+
+
 def detect_intent_with_text_inputs(query_text, session_id):
     ai = apiai.ApiAI(settings.CLIENT_ACCESS_TOKEN)
     request = ai.text_request()
@@ -18,6 +22,10 @@ def days_hours_minutes(td):
 
 
 def format_date_hours_minutes_worked(days, hours, minutes):
+   if not days and not hours and not minutes:
+       response_string = "-"
+       return response_string
+
    response_string =""
    is_component_present = False
    if days != 0:
@@ -57,9 +65,26 @@ def format_end_session_response(days, hours, minutes, task_name):
     return response
 
 
+def format_time_spent(days, hours, minutes, task_name):
+    if hours == 0 and minutes == 0:
+        response = "You haven't learnt for a minute."
+
+    else:
+        work_time_string = format_date_hours_minutes_worked(days, hours, minutes)
+        response = "You have been learning {0} for {1} now.".format(task_name, work_time_string)
+    return response
+
+
+def create_interactive_message(text, attachment):
+    return {
+        "attachments": [attachment],
+        "text": text
+    }
+
+
 def get_task_detail_display_attachment(title, task_name, tag_name, deadline, student, eta, completion_value, time_spent):
     STANDARD_COLOR_CODE = "#164bdd"
-    payload =  {
+    payload = {
         "color": STANDARD_COLOR_CODE,
         "title": title,
         "fields": [
@@ -75,12 +100,12 @@ def get_task_detail_display_attachment(title, task_name, tag_name, deadline, stu
             },
             {
                 "title": "Student",
-                "value": student,
+                "value": format_user_id(student),
                 "short": "false"
             },
             {
                 "title": "Deadline",
-                "value": deadline,
+                "value": str(deadline),
                 "short": "false"
             },
             {

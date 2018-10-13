@@ -3,27 +3,20 @@ from slugify import slugify
 
 from django.utils import timezone
 
+from bot_messages.utils import get_task_detail_display_attachment, create_interactive_message
 from studyobjects.base import IntentHandler
 from studyobjects.models import Course, UserEnvironment, Task
 from user.models import TeamMembership
-from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow
-from bot_messages.responses import TaskResponses
+from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow, format_date_and_time
+from bot_messages.responses import TaskResponses, SessionResponses
+from bot_messages.responses import FAILURE, SUCCESS
 
 
 class TaskHandler(IntentHandler):
+
     def __init__(self, intent_response_dict, user, action):
         self.user_environment = UserEnvironment.objects.get(user=user)
         super().__init__(intent_response_dict, user, action)
-
-    def get_object(self):
-        course_name = self.response.get("course")
-        if not course_name:
-            return None
-        try:
-            self.course = Course.objects.get(name=course_name, team=self.user.team)
-            return self.course
-        except Course.DoesNotExist:
-            return None
 
     def create(self):
         name = self.response["name"]
@@ -31,7 +24,7 @@ class TaskHandler(IntentHandler):
         eta = get_displaced_time_from_duration_entity(timezone.now(), self.response["eta"])
         assessment = self.user_environment.assessment
         tag = self.user_environment.tag
-        Task.objects.get_or_create(
+        task, created = Task.objects.get_or_create(
             name=formatted_task_name,
             assessment=assessment,
             tag=tag,
@@ -39,7 +32,8 @@ class TaskHandler(IntentHandler):
             eta=eta
         )
         add_entity_in_dialogflow("Task", formatted_task_name, [name, ])
-        return True
+        return SessionResponses.time_stats_response("New task added!", task, timedelta())
+
 
     def get_task_object(self):
         name = self.response["name"]
@@ -72,11 +66,6 @@ class TaskHandler(IntentHandler):
                 task.name, dest_status
             )
 
-    def task_detail(self):
-        # task_detail
-        task = self.get_object()
-        return dict(task.values_list())
-
     def listall(self):
         # added in intent dialog flow
         tasks = Task.objects.filter(
@@ -108,7 +97,9 @@ class TaskHandler(IntentHandler):
             tag=self.user_environment.tag
         ).values_list('name', flat=True)
         formatted_task_names = format_tasks(tasks)
-        return formatted_task_names
+        if tasks:
+            return SessionResponses.list_tasks_msg(formatted_task_names).get(SUCCESS)
+        return SessionResponses.list_tasks_msg("In Progress").get(FAILURE)
 
     def listcompleted(self):
         # added in intent dialog flow
@@ -120,6 +111,22 @@ class TaskHandler(IntentHandler):
         ).values_list('name', flat=True)
         formatted_task_names = format_tasks(tasks)
         return formatted_task_names
+
+
+    def update_progress_in_task(self):
+        task_name = self.response["task"]
+        completion_value_in_percent = self.response["completion_value"]
+        completion_value_percent_symbol_index = completion_value_in_percent.find("%")
+        completion_value = int(completion_value_in_percent[:completion_value_percent_symbol_index])
+        assessment = UserEnvironment.objects.get(user=self.user).assessment
+        task = Task.objects.get(
+            name=task_name,
+            student=self.user,
+            assessment=assessment
+        )
+        task.progress = completion_value
+        task.save()
+        return True
 
 
 def format_tasks(tasks):
