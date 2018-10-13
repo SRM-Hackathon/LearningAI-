@@ -9,6 +9,7 @@ from studyobjects.base import IntentHandler
 # 6. assign doubt when doubt created will be assigned to anyone
 from studyobjects.models import UserEnvironment, Doubts, DoubtsClarified
 from utils import add_entity_in_dialogflow
+from bot_messages.responses import DoubtResponses
 
 
 class DoubtsHandler(IntentHandler):
@@ -85,10 +86,8 @@ class DoubtsHandler(IntentHandler):
             user=self.user,
             is_clarified=False
         )
-        if doubts:
-            return
-        return "No doubts asked so far"
-
+        response = DoubtResponses.list_unsolved_doubts_assigned_to_me_msg(doubts)
+        return response
 
 
 

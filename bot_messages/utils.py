@@ -128,3 +128,22 @@ def get_task_detail_display_attachment(title, task_name, tag_name, deadline, stu
         "footer": "Zoey Analytics"
     }
     return payload
+
+def build_doubt_attachment_payload(doubts, card_title):
+    STANDARD_COLOR_CODE = "#164bdd"
+    fields = []
+    for doubt in doubts:
+        field_dict = {}
+        field_dict["title"] = doubt.title
+        field_dict["value"] = doubt.description
+        field_dict["short"] = "false"
+        fields.append(field_dict)
+
+    payload = {
+        "color": STANDARD_COLOR_CODE,
+        "title": card_title,
+        "fields": fields,
+        "footer": "Zoey Doubt assist"
+
+    }
+    return payload

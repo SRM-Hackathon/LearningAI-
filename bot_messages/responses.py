@@ -1,5 +1,8 @@
 from bot_messages.utils import get_task_detail_display_attachment
 from bot_messages.utils import days_hours_minutes, format_date_hours_minutes_worked, format_end_session_response
+from utils import format_date_and_time
+
+from bot_messages.utils import build_doubt_attachment_payload
 
 class TaskResponses:
 
@@ -12,6 +15,9 @@ class TaskResponses:
         return "The state of your task, {task_name} is moved to {dest}".format(
             task_name=task_name,  dest=dest_state.lower(),
         )
+
+SUCCESS = "SUCCESS"
+FAILURE = "FAILURE"
 
 class SessionResponses:
 
@@ -52,13 +58,23 @@ class SessionResponses:
     @classmethod
     def resume_session_msg(cls, task):
         return {
-            "SUCCESS": "Awesome.. Your are resuming your session on {}".format(task.name),
-            "FAILURE": "Couldn't find your session. Check if a task by the name {} exists".format(task.name)
+            SUCCESS: "Awesome.. Your are resuming your session on {}".format(task.name),
+            FAILURE: "Couldn't find your session. Check if a task by the name {} exists".format(task.name)
         }
 
 
 class DoubtResponses:
 
     @classmethod
-    def list_unsolved_doubts_msg(cls, doubts):
-        pass
+    def list_unsolved_doubts_assigned_to_me_msg(cls, doubts):
+        if len(doubts) == 0:
+            return "You don't have any doubts to answer"
+
+        return build_doubt_attachment_payload(doubts, "Doubts")
+
+    @classmethod
+    def list_tasks_msg(cls, name):
+        return {
+            SUCCESS: "Available tasks are \n{}".format(name),
+            FAILURE: "You don't have any tasks in the {}".format(name)
+        }
