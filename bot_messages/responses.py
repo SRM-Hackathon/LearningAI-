@@ -1,5 +1,6 @@
 from bot_messages.utils import get_task_detail_display_attachment
 from bot_messages.utils import days_hours_minutes, format_date_hours_minutes_worked, format_end_session_response
+from bot_messages.utils import build_doubt_attachment_payload
 
 class TaskResponses:
 
@@ -60,5 +61,8 @@ class SessionResponses:
 class DoubtResponses:
 
     @classmethod
-    def list_unsolved_doubts_msg(cls, doubts):
-        pass
+    def list_unsolved_doubts_assigned_to_me_msg(cls, doubts):
+        if len(doubts) == 0:
+            return "You don't have any doubts to answer"
+
+        return build_doubt_attachment_payload(doubts, "Doubts")
