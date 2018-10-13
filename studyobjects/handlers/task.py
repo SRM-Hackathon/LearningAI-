@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 from slugify import slugify
 
@@ -8,7 +9,8 @@ from studyobjects.base import IntentHandler
 from studyobjects.models import Course, UserEnvironment, Task
 from studyobjects.tasks import ask_for_update_when_eta_expires
 from user.models import TeamMembership
-from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow, format_date_and_time
+from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow, format_date_and_time, \
+    create_context
 from bot_messages.responses import TaskResponses, SessionResponses
 from bot_messages.responses import FAILURE, SUCCESS
 
@@ -19,19 +21,16 @@ class TaskHandler(IntentHandler):
         identity = task.student.platform_user.identity
         task.eta = dt
         task.save()
-        # ask_for_update_when_eta_expires.apply_async(
-        #     args=[task.student.platform_user.identity],
-        #     eta=dt
-        # )
-        ask_for_update_when_eta_expires(identity)
+        ask_for_update_when_eta_expires.apply_async(
+            args=[task.student.platform_user.identity, task.id, self.user.team.identity],
+            eta=dt
+        )
 
     def __init__(self, intent_response_dict, user, action):
         self.user_environment = UserEnvironment.objects.get(user=user)
         super().__init__(intent_response_dict, user, action)
 
     def create(self):
-        ask_for_update_when_eta_expires(self.user.platform_user.identity)
-        return False
         name = self.response["name"]
         formatted_task_name = slugify(self.response["name"])
         eta = get_displaced_time_from_duration_entity(timezone.now(), self.response["eta"])
@@ -139,6 +138,15 @@ class TaskHandler(IntentHandler):
         )
         task.progress = completion_value
         task.save()
+        return True
+
+    def update_eta(self):
+        task = self.response['task']
+        eta = self.response['eta']
+        env = UserEnvironment.objects.get(user=self.user)
+        task = Task.objects.get(student=self.user, assessment=env.assessment, name=task)
+        new_eta = get_displaced_time_from_duration_entity(task.eta, eta)
+        self.set_eta(task, new_eta)
         return True
 
 

@@ -4,8 +4,9 @@ import re
 import apiai
 
 from datetime import timedelta
-
 import requests
+
+from django.conf import settings
 from django.contrib.auth.models import User
 
 from learning_dot_ai.settings import CLIENT_ACCESS_TOKEN, DEVELOPER_ACCESS_TOKEN, ENTITY_ADDITION_URL, DEVELOPER_HEADERS
@@ -15,7 +16,6 @@ from user.models import Team, PlatformUser, TeamMembership
 
 
 def get_displaced_time_from_duration_entity(current_time, duration):
-    print(current_time)
     duration_magnitude = duration["amount"]
     unit = duration["unit"]
     if unit == 'h':
@@ -45,11 +45,23 @@ def prepare_data_for_user(payload):
     channel = payload["channel"]
     team, _ = Team.objects.get_or_create(identity=team)
     user, _ = User.objects.get_or_create(username=identity)
-    pu, _ = PlatformUser.objects.get_or_create(identity=identity, user=user)
+    pu, _ = PlatformUser.objects.update_or_create(identity=identity, user=user, defaults={'channel_id': channel})
     tm, created = TeamMembership.objects.get_or_create(platform_user=pu, team=team)
     assessment = Assessment.objects.all().order_by('scheduled_at').first()
     if assessment:
         associate_course_with_users(assessment=assessment)
+
+
+def create_context(session_id, request_dict):
+    context_request = requests.post(
+        settings.CONTEXTS_ENDPOINT.format(session_id),
+        data=request_dict,
+        headers=settings.DEVELOPER_HEADERS
+    )
+    if context_request.status_code == 200:
+        return True
+    else:
+        return False
 
 
 def parse_message(message):

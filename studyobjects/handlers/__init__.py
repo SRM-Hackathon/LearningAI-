@@ -5,5 +5,5 @@ from studyobjects.handlers.sessions import SessionHandler
 from studyobjects.handlers.doubts import DoubtsHandler
 
 __all__ = [
-    'TaskHandler', 'CourseHandler', 'AssessmentHandler', 'SessionHandler','DoubtsHandler'
+    'TaskHandler', 'CourseHandler', 'AssessmentHandler', 'SessionHandler', 'DoubtsHandler'
 ]

@@ -127,4 +127,4 @@ class DoubtsClarified(TimeStampMixin):
     is_clarified = models.BooleanField(default=False)
 
     cleared_by = models.ForeignKey(TeamMembership, on_delete=models.PROTECT)
-    doubt = models.ForeignKey(Doubts, on_delete=models.CASCADE)
+    doubt = models.ForeignKey(Doubts, on_delete=models.CASCADE, related_name="clarifications")

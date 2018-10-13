@@ -144,6 +144,5 @@ def build_doubt_attachment_payload(doubts, card_title):
         "title": card_title,
         "fields": fields,
         "footer": "Zoey Doubt assist"
-
     }
-    return payload
+    return create_interactive_message("", payload)
