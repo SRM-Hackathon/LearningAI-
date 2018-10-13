@@ -1,3 +1,4 @@
+from constants import GROUP_ADMINS
 from studyobjects.base import IntentHandler
 
 # TODO
@@ -8,8 +9,20 @@ from studyobjects.base import IntentHandler
 # 5. create doubt - only for that environment
 # 6. assign doubt when doubt created will be assigned to anyone
 from studyobjects.models import UserEnvironment, Doubts, DoubtsClarified
+from user.models import TeamMembership
 from utils import add_entity_in_dialogflow
 from bot_messages.responses import DoubtResponses
+from django.contrib.auth.models import Group
+
+
+def notify_to_clarify_doubt(doubt_clarified):
+    # TODO (Panneer) - create text format for slack
+    pass
+
+
+def notify_doubt_asked_person(doubts_clarified):
+    # TODO (Panneer) - create text format for slack
+    pass
 
 
 class DoubtsHandler(IntentHandler):
@@ -29,14 +42,23 @@ class DoubtsHandler(IntentHandler):
             tag=self.user_environment.tag,
             assessment=self.user_environment.assessment
         )
-        doubt.title = doubt.tag.name + "-" +  str(doubt.id)
+        doubt.title = doubt.tag.name + "-" + str(doubt.id)
         doubt.save()
-        self.assign_to_friends()
+        self.assign_to_friends(doubt)
         add_entity_in_dialogflow("Doubt", doubt.title, [doubt.title])
         return "Doubt has been shared with friends successfully"
 
-    def assign_to_friends(self):
-        pass
+    def assign_to_friends(self, doubt):
+        user_environment = UserEnvironment.objects.get(user=self.user)
+        admin_group = Group.objects.create(name=GROUP_ADMINS)
+        team_membership = TeamMembership.objects.filter(team=self.user.team).exclude(platform_user=self.user, groups=admin_group).values_list('id',flat=True)
+        user = UserEnvironment.objects.filter(users__in=team_membership, assessment=user_environment.assessment).order_by('-utc_update').first()
+
+        doubt_clarified = DoubtsClarified.objects.create(
+            cleared_by=user,
+            doubt=doubt
+        )
+        notify_to_clarify_doubt(doubt_clarified)
 
     def list_all(self):
         doubts = Doubts.objects.filter(
@@ -88,3 +110,22 @@ class DoubtsHandler(IntentHandler):
         )
         response = DoubtResponses.list_unsolved_doubts_assigned_to_me_msg(doubts)
         return response
+
+    def answer_doubt(self):
+        title = self.response().get('Doubt')
+        description = self.response().get('any')
+
+        doubt = Doubts.objects.get(title=title)
+
+        doubts_clarified = DoubtsClarified.objects.get(doubt=doubt, clarified_by=self.user)
+        doubts_clarified.is_clarified = True
+        doubts_clarified.clarified_response = description
+        doubts_clarified.save()
+
+        doubt.is_clarified = True
+        doubt.save()
+
+        notify_doubt_asked_person(doubts_clarified)
+
+
+

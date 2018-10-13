@@ -123,8 +123,8 @@ class Doubts(TimeStampMixin):
 
 
 class DoubtsClarified(TimeStampMixin):
-    clarified_response = models.TextField()
-    is_clarified = models.BigAutoField(default=False)
+    clarified_response = models.TextField(blank=True, null=True)
+    is_clarified = models.BooleanField(default=False)
 
     cleared_by = models.ForeignKey(TeamMembership, on_delete=models.PROTECT)
     doubt = models.ForeignKey(Doubts, on_delete=models.CASCADE)
