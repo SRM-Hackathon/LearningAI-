@@ -6,6 +6,7 @@ from django.utils import timezone
 from bot_messages.utils import get_task_detail_display_attachment, create_interactive_message
 from studyobjects.base import IntentHandler
 from studyobjects.models import Course, UserEnvironment, Task
+from studyobjects.tasks import ask_for_update_when_eta_expires
 from user.models import TeamMembership
 from utils import get_displaced_time_from_duration_entity, add_entity_in_dialogflow, format_date_and_time
 from bot_messages.responses import TaskResponses, SessionResponses
@@ -14,11 +15,23 @@ from bot_messages.responses import FAILURE, SUCCESS
 
 class TaskHandler(IntentHandler):
 
+    def set_eta(self, task, dt):
+        identity = task.student.platform_user.identity
+        task.eta = dt
+        task.save()
+        # ask_for_update_when_eta_expires.apply_async(
+        #     args=[task.student.platform_user.identity],
+        #     eta=dt
+        # )
+        ask_for_update_when_eta_expires(identity)
+
     def __init__(self, intent_response_dict, user, action):
         self.user_environment = UserEnvironment.objects.get(user=user)
         super().__init__(intent_response_dict, user, action)
 
     def create(self):
+        ask_for_update_when_eta_expires(self.user.platform_user.identity)
+        return False
         name = self.response["name"]
         formatted_task_name = slugify(self.response["name"])
         eta = get_displaced_time_from_duration_entity(timezone.now(), self.response["eta"])
@@ -29,8 +42,8 @@ class TaskHandler(IntentHandler):
             assessment=assessment,
             tag=tag,
             student=self.user,
-            eta=eta
         )
+        self.set_eta(task, eta)
         add_entity_in_dialogflow("Task", formatted_task_name, [name, ])
         return SessionResponses.time_stats_response("New task added!", task, timedelta())
 
