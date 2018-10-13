@@ -121,3 +121,4 @@ def build_doubt_attachment_payload(doubts, card_title):
         "footer": "Zoey Doubt assist"
 
     }
+    return payload
