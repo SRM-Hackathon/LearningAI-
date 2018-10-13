@@ -88,6 +88,3 @@ class DoubtsHandler(IntentHandler):
         )
         response = DoubtResponses.list_unsolved_doubts_assigned_to_me_msg(doubts)
         return response
-
-
-
