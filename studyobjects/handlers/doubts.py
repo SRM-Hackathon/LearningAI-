@@ -27,7 +27,11 @@ class DoubtsHandler(IntentHandler):
             tag=self.user_environment.tag,
             assessment=self.user_environment.assessment
         )
+        self.assign_to_friends()
         return "Doubt has been shared with friends successfully"
+
+    def assign_to_friends(self):
+        pass
 
     def list_all(self):
         doubts = Doubts.objects.filter(
