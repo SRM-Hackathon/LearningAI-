@@ -1,5 +1,6 @@
 import json
 
+from bot_messages.utils import create_interactive_message
 from utils import create_context
 
 
@@ -11,19 +12,31 @@ def create_context_for_eta_updation(task_name, user_id):
     return status
 
 
-def
-{
-    "text": "Choose a tag",
-    "color": "#3AA3E3",
-    "attachment_type": "default",
-    "callback_id": "user_id",
-    "actions": [
-        {
-            "name": "Tags",
-            "text": "Choose a tag",
-            "type": "select",
-            "options": []
-        }
-    ]
-}
-
+def create_select_tag_payload(tags):
+    payload = {
+        "text": "Hey, choose the tag(concept) that you are going to focus now.",
+        "color": "#3AA3E3",
+        "attachment_type": "default",
+        "callback_id": "user_id",
+        "actions": []
+    }
+    action = {
+        "name": "Tags",
+        "text": "Choose a tag",
+        "type": "select",
+        "options": []
+    }
+    options = action["options"]
+    for tag in tags:
+        text = tag.name
+        value = tag.id
+        options.append(
+            {
+                "text": text,
+                "value": value
+            }
+        )
+    action["options"] = options
+    payload["actions"].append(action)
+    print(payload)
+    return create_interactive_message("", payload)
