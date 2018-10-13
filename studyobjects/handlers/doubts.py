@@ -8,6 +8,7 @@ from studyobjects.base import IntentHandler
 # 5. create doubt - only for that environment
 # 6. assign doubt when doubt created will be assigned to anyone
 from studyobjects.models import UserEnvironment, Doubts, DoubtsClarified
+from utils import add_entity_in_dialogflow
 
 
 class DoubtsHandler(IntentHandler):
@@ -21,13 +22,20 @@ class DoubtsHandler(IntentHandler):
     def create(self):
         # user, description, tag, assessment
         description = self.response.get('description')
-        Doubts.objects.create(
+        doubt = Doubts.objects.create(
             user=self.user,
             description=description,
             tag=self.user_environment.tag,
             assessment=self.user_environment.assessment
         )
+        doubt.title = doubt.tag.name + "-" +  str(doubt.id)
+        doubt.save()
+        self.assign_to_friends()
+        add_entity_in_dialogflow("Doubt", doubt.title, [doubt.title])
         return "Doubt has been shared with friends successfully"
+
+    def assign_to_friends(self):
+        pass
 
     def list_all(self):
         doubts = Doubts.objects.filter(
