@@ -20,6 +20,11 @@ def notify_to_clarify_doubt(doubt_clarified):
     pass
 
 
+def notify_doubt_asked_person(doubts_clarified):
+    # TODO (Panneer) - create text format for slack
+    pass
+
+
 class DoubtsHandler(IntentHandler):
     def __init__(self, intent_response_dict, user, action):
         self.get_environment(user)
@@ -37,7 +42,7 @@ class DoubtsHandler(IntentHandler):
             tag=self.user_environment.tag,
             assessment=self.user_environment.assessment
         )
-        doubt.title = doubt.tag.name + "-" +  str(doubt.id)
+        doubt.title = doubt.tag.name + "-" + str(doubt.id)
         doubt.save()
         self.assign_to_friends(doubt)
         add_entity_in_dialogflow("Doubt", doubt.title, [doubt.title])
@@ -54,7 +59,6 @@ class DoubtsHandler(IntentHandler):
             doubt=doubt
         )
         notify_to_clarify_doubt(doubt_clarified)
-
 
     def list_all(self):
         doubts = Doubts.objects.filter(
@@ -106,6 +110,22 @@ class DoubtsHandler(IntentHandler):
         )
         response = DoubtResponses.list_unsolved_doubts_assigned_to_me_msg(doubts)
         return response
+
+    def answer_doubt(self):
+        title = self.response().get('Doubt')
+        description = self.response().get('any')
+
+        doubt = Doubts.objects.get(title=title)
+
+        doubts_clarified = DoubtsClarified.objects.get(doubt=doubt, clarified_by=self.user)
+        doubts_clarified.is_clarified = True
+        doubts_clarified.clarified_response = description
+        doubts_clarified.save()
+
+        doubt.is_clarified = True
+        doubt.save()
+
+        notify_doubt_asked_person(doubts_clarified)
 
 
 
