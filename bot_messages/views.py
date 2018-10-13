@@ -14,7 +14,6 @@ from utils import prepare_data_for_user, parse_message, render_default_response
 @csrf_exempt
 def send_to_dialogflow(request):
     # Send to Dialogflow and receive response
-
     payload = json.loads(request.body)
     payload = payload["message"]
     prepare_data_for_user(payload)
@@ -34,6 +33,12 @@ def send_to_dialogflow(request):
     handler_action_delimiter_index =  response_handler_and_action.find('_')
     handler = response_handler_and_action[:handler_action_delimiter_index]
     action = response_handler_and_action[handler_action_delimiter_index + 1:]
-
+    print(handler)
+    print(action)
     response = eval(handler)(query_response["parameters"], user, action).execute()
-    return HttpResponse(render_default_response(query_response), status=200)
+    if isinstance(response, bool):
+        return HttpResponse(render_default_response(query_response), status=200)
+    else:
+        print(response)
+        response = json.dumps(response)
+        return HttpResponse(response, status=200)

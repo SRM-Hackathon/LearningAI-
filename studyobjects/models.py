@@ -74,11 +74,14 @@ class Task(TimeStampMixin):
 
         elif self.state == Task.TODO:
             self.state = Task.IN_PROGRESS
+            state = "In Progress"
 
         else:
             self.state = Task.COMPLETED
+            state = "Completed"
 
-        return self.state
+        self.save()
+        return state
 
     class Meta:
         unique_together = ('name', 'assessment', 'student')
@@ -102,7 +105,7 @@ class UserSession(TimeStampMixin):
 
     is_master = models.BooleanField(default=False)
     termination_type = models.CharField(max_length=5, choices=TERMINATION_TYPE_CHOICES, null=True)
-    start_time = models.DateTimeField(blank=True, null=True)
+    start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
     user = models.ForeignKey(TeamMembership, on_delete=models.CASCADE)

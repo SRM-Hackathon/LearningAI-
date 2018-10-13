@@ -54,7 +54,6 @@ def prepare_data_for_user(payload):
 def parse_message(message):
     match = re.search("(?<=<@)\w+(?<!>)", message)
     if match:
-        print("I am here")
         message = re.sub("(<@\w+>)", match.group(0), message)
     return message
 
@@ -66,3 +65,7 @@ def associate_course_with_users(**kwargs):
 
 def render_default_response(response_results):
     return response_results['fulfillment']['speech']
+
+
+def format_date_and_time(datetime):
+    return datetime.strftime("%d/%m/%Y %I:%M %p")
