@@ -15,11 +15,12 @@ from user.models import Team, PlatformUser, TeamMembership
 
 
 def get_displaced_time_from_duration_entity(current_time, duration):
+    print(current_time)
     duration_magnitude = duration["amount"]
     unit = duration["unit"]
     if unit == 'h':
         displaced_time = current_time + timedelta(hours=duration_magnitude)
-    elif unit == 'm':
+    elif unit == 'min':
         displaced_time = current_time + timedelta(minutes=duration_magnitude)
     else:
         displaced_time = current_time + timedelta(days=duration_magnitude)
@@ -35,6 +36,7 @@ def add_entity_in_dialogflow(entity_type, entity_name, synonyms):
         data=serialized_dict,
         headers=DEVELOPER_HEADERS
     )
+    print(entity_request.status_code)
 
 
 def prepare_data_for_user(payload):
@@ -53,7 +55,6 @@ def prepare_data_for_user(payload):
 def parse_message(message):
     match = re.search("(?<=<@)\w+(?<!>)", message)
     if match:
-        print("I am here")
         message = re.sub("(<@\w+>)", match.group(0), message)
     return message
 
@@ -62,3 +63,10 @@ def associate_course_with_users(**kwargs):
     memberships = TeamMembership.objects.all()
     for member in memberships:
         UserEnvironment.objects.update_or_create(user=member, defaults=kwargs)
+
+def render_default_response(response_results):
+    return response_results['fulfillment']['speech']
+
+
+def format_date_and_time(datetime):
+    return datetime.strftime("%d/%m/%Y %I:%M %p")

@@ -135,3 +135,10 @@ DEVELOPER_HEADERS = {
 }
 ENTITY_ADDITION_URL = "https://api.api.ai/v1/entities/{0}/entries?v=20150910"
 
+RABBIT_HOSTNAME = os.environ.get('RABBIT_PORT_5672_TCP', 'rabbit')
+
+BROKER_URL = 'amqp://{user}:{password}@{hostname}/{vhost}/'.format(
+    user=os.environ.get('RABBIT_ENV_USER', 'admin'),
+    password=os.environ.get('RABBIT_ENV_RABBITMQ_PASS', 'dmango'),
+    hostname=RABBIT_HOSTNAME,
+    vhost=os.environ.get('RABBIT_ENV_VHOST', ''))
